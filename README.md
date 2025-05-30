@@ -105,6 +105,38 @@ The Raspberry PI 5 is installed using Raspberry PI Imager, the chosen operation 
 3. RabbitMQ ManagementUI should now be available at the pi's ``hostname/ipaddress:15672``
     1. The default login is: guest:guest
 
+## Zigbee2MQTT
+
+1. Start an instance of Zigbee2MQTT using docker:
+    1. Remember to map the correct usb cordinator device on the --device line: 
+
+    ```bash
+    docker run -it -d --name zigbee2mqtt --restart=unless-stopped --device=/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B001DF40392-if00:/dev/ttyACM0 -p 8080:8080 -v $(pwd)/data:/app/data -v /run/udev:/run/udev:ro -e TZ=Europe/Amsterdam ghcr.io/koenkk/zigbee2mqtt
+    ```
+
+2. Stop the RabbitMQ and Zigbee2MQTT instances:
+    1. Run: `docker ps` find the container id's for rabbitmq and zigbee2mqtt
+    2. Run: `docker stop <id>` for both containers
+
+3. Create a network for your RabbitMQ instance and the Zigbee2MQTT instance and attach it to the containers:
+    ```
+    docker network create zigbee_net
+    docker network connect zigbee_net rabbitmq
+    docker network connect zigbee_net zigbee2mqtt
+    ```
+
+4. Configure the Zigbee2Mqtt instance:
+    1. In the working directory you started Zigbee2Mqtt from, run the following command: `sudo nano data/configuration.yaml`
+    2. In the mqtt section change the server address to: mqtt://rabbitmq:1883
+    3. In the front end section, set the enabled to true
+    4. Save changes (CTRL + X, y, enter)
+
+2. Stop the RabbitMQ  and Zigbee2MQTT instances:
+    1. Run: `docker ps` find the container id's for rabbitmq and zigbee2mqtt
+    2. Run: `docker stop <id>` for both containers
+
+Rest is TBD
+
 ## InfluxDB
 
 1. Starting an instance of InfluxDB using Docker:
@@ -134,3 +166,5 @@ The Raspberry PI 5 is installed using Raspberry PI Imager, the chosen operation 
         1. Go to the data tab on the left side
         2. Click on buckets
         3. Create a new one, or use the already created ``Telemetry`` bucket.
+
+## Api (TBD)

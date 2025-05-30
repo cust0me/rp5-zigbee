@@ -1,0 +1,9 @@
+### GET latest telemetry data
+GET https://localhost:5000/telemetry/latest
+
+### GET historical telemetry data
+GET https://localhost:5000/telemetry/historical
+
+
+### GET historical telemetry data
+GET https://localhost:5000/telemetry/devices
