@@ -1,4 +1,4 @@
-name: publish
+name: Build and Publish API
 
 on:
   push:
@@ -13,16 +13,24 @@ env:
 
 jobs:
   publish:
-    name: publish image
+    name: API
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Login
-      run: |
-        echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }}
-        --password-stdin  
-    - name: Build and publish
-      run: |
-        docker Build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.PAT }}
+
+    - name: Build and push Docker image
+      id: push
+      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      with:
+        context: .
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
