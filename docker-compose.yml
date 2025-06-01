@@ -1,0 +1,91 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "1883:1883"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt
+    ports:
+      - "8080:8080"
+    devices:
+      - "${ZIGBEE_ADAPTER}:/dev/ttyACM0"
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml:ro
+      - ./volumes/zigbee2mqtt-data:/app/data
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    environment:
+      INFLUXDB_DB: ${INFLUXDB_BUCKET}
+      INFLUXDB_ADMIN_USER: ${INFLUXDB_ADMIN_USER}
+      INFLUXDB_ADMIN_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
+      INFLUXDB_HTTP_AUTH_ENABLED: "true"
+    volumes:
+      - ./volumes/influxdb-data:/var/lib/influxdb2
+
+  influx-init:
+    image: influxdb:2.7
+    depends_on:
+      - influxdb
+    entrypoint: |
+      /bin/sh -c "
+      set -e
+      until curl -s http://influxdb:8086/health | grep 'pass'; do sleep 2; done
+      influx setup --bucket ${INFLUXDB_BUCKET} --org ${INFLUXDB_ORG} --username ${INFLUXDB_ADMIN_USER} --password ${INFLUXDB_ADMIN_PASSWORD} --token ${INFLUXDB_TOKEN} --host http://influxdb:8086 --force
+      influx auth create --read-buckets --write-buckets --org ${INFLUXDB_ORG} --host http://influxdb:8086 --token ${INFLUXDB_TOKEN} > /init/token.txt
+      cat /init/token.txt"
+    volumes:
+      - ./volumes/influx-token:/init
+
+  influx-token-extract:
+    image: python:3.11-alpine
+    depends_on:
+      - influx-init
+    volumes:
+      - ./volumes/influx-token:/init
+      - ./.env:/work/.env
+      - ./extract_token.py:/extract_token.py:ro
+    entrypoint: python /extract_token.py
+
+  api:
+    image: ghcr.io/cust0me/rp5-zigbee-api:master
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      - rabbitmq
+      - influxdb
+      - influx-init
+      - influx-token-extract
+    environment:
+      MqttBroker__Host: rabbitmq
+      MqttBroker__Port: 5672
+      MqttBroker__UseTls: "false"
+      MqttBroker__Username: ${RABBITMQ_USER}
+      MqttBroker__Password: ${RABBITMQ_PASSWORD}
+
+      InfluxDB__Host: influxdb
+      InfluxDB__Token: ${INFLUXDB_TOKEN}
+      InfluxDB__OrgId: ${INFLUXDB_ORG}
+      InfluxDB__Bucket: ${INFLUXDB_BUCKET}
+
+  # frontend:
+  #   image: ghcr.io/cust0me/rp5-zigbee-web
+  #   environment:
+  #     API_URL: http://api:${API_PORT}
+  #     FRONTEND_PORT: ${FRONTEND_PORT}
+  #   ports:
+  #     - "${FRONTEND_PORT}:8080"
+
+volumes:
+  influxdb-data:
+  influx-token:

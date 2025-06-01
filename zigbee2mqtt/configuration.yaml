@@ -1,0 +1,54 @@
+version: 4
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://rabbitmq:1883
+  username: zigbee2mqtt
+  password: zigbee2mqtt
+serial:
+  adapter: zstack
+  baudrate: 115200
+  port: /dev/ttyACM0
+advanced:
+  log_level: info
+  channel: 11
+  network_key:
+    - 22
+    - 67
+    - 244
+    - 208
+    - 206
+    - 58
+    - 184
+    - 72
+    - 236
+    - 244
+    - 184
+    - 23
+    - 138
+    - 207
+    - 86
+    - 247
+  pan_id: 24547
+  ext_pan_id:
+    - 86
+    - 209
+    - 82
+    - 255
+    - 155
+    - 239
+    - 222
+    - 93
+  adapter_concurrent: 2
+  transmit_power: 5
+  last_seen: ISO_8601
+frontend:
+  enabled: true
+  port: 8080
+homeassistant:
+  enabled: false
+devices:
+  '0x54ef44100091a459':
+    friendly_name: '0x54ef44100091a459'
+    availability: true
+    homeassistant: {}
+    optimistic: false
