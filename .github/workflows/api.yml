@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{github_actor}}/rp5-zigbee-api:latest
+  IMAGE_NAME: ${{github.actor}}/rp5-zigbee-api:latest
 
 jobs:
   publish:
@@ -24,5 +24,5 @@ jobs:
         --password-stdin  
     - name: Build and publish
       run: |
-        docker Build . --tag ${{ envv.REGISTRY }}/${{ env.IMAGE_NAME }}
-        docker push ${{ envv.REGISTRY }}/${{ env.IMAGE_NAME }}
+        docker Build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
