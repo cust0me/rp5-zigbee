@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: rp5-zigbee-api
+  IMAGE_NAME: ${{ github.actor }}/rp5-zigbee-api
 
 jobs:
   build-and-push-image:
