@@ -8,9 +8,12 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    command: >
+      bash -c "rabbitmq-plugins enable rabbitmq_mqtt"
 
   zigbee2mqtt:
     image: koenkk/zigbee2mqtt
+    restart: unless-stopped
     ports:
       - "8080:8080"
     devices:
