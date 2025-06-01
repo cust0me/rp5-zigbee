@@ -11,10 +11,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: rp5-zigbee-api
 
-defaults:
- run:
-  working-directory: ./RP5.API
-
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
@@ -24,6 +20,10 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+
+    defaults:
+      run:
+        working-directory: ./RP5.API
 
     steps:
       - name: Checkout repository
