@@ -1,9 +1,9 @@
-name: Create and publish WEB
+name: Create and publish Web
 
 on:
   push:
     paths:
-      - RP5.WEB\**
+      - RP5.Web\**
     branches: [ "master" ]
   workflow_dispatch:
 
@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          file: ./RP5.WEB/Dockerfile
+          file: ./RP5.Web/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
