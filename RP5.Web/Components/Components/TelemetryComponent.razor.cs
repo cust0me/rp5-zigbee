@@ -21,9 +21,13 @@ public partial class TelemetryComponent(ITelemetryService telemetryService) : Co
 
     private IEnumerable<TelemetryData> FilteredTelemetryData => _telemetryData;
 
-    private float _minTemp => _telemetryData.Count > 0 ? (float)(Math.Floor(_telemetryData.Min(e => e.Temperature) ?? 15f) - 2f) : 0f;
+    private float MinTemp => _telemetryData.Count > 0 ? (float)(Math.Floor(_telemetryData.Min(e => e.Temperature) ?? 15f) - 2f) : 0f;
 
-    private float _maxTemp => _telemetryData.Count > 0 ? (float)(Math.Ceiling(_telemetryData.Max(e => e.Temperature) ?? 25f) + 2f) : 40f;
+    private float MaxTemp => _telemetryData.Count > 0 ? (float)(Math.Ceiling(_telemetryData.Max(e => e.Temperature) ?? 25f) + 2f) : 40f;
+
+    private float MinHum => _telemetryData.Count > 0 ? (float)(Math.Floor(_telemetryData.Min(e => e.Humidity) ?? 55f) - 2f) : 55f;
+
+    private float MaxHum => _telemetryData.Count > 0 ? (float)(Math.Ceiling(_telemetryData.Max(e => e.Humidity) ?? 80f) + 2f) : 80f;
 
     private async Task LoadDataAsync()
     {
