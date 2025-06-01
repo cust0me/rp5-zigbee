@@ -21,10 +21,6 @@ jobs:
       attestations: write
       id-token: write
 
-    defaults:
-      run:
-        working-directory: ./RP5.API
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,7 +42,7 @@ jobs:
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
-          context: .
+          context: ./RP5.API
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
