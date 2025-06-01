@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using RP5.Web.Models;
 using RP5.Web.Services;
-using Syncfusion.Blazor.Charts;
 
 namespace RP5.Web.Components.Components;
 
 public partial class TelemetryComponent(ITelemetryService telemetryService) : ComponentBase
-{
+    {
     private readonly ITelemetryService _telemetryService = telemetryService ?? throw new ArgumentNullException(nameof(telemetryService));
 
     [Parameter, EditorRequired]
