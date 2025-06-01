@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using RP5.Web.Models;
 using RP5.Web.Services;
+using Syncfusion.Blazor.Charts;
 
 namespace RP5.Web.Components.Components;
 
@@ -29,11 +30,12 @@ public partial class TelemetryComponent(ITelemetryService telemetryService) : Co
 
     private float MaxHum => _telemetryData.Count > 0 ? (float)(Math.Ceiling(_telemetryData.Max(e => e.Humidity) ?? 80f) + 2f) : 80f;
 
+
     private async Task LoadDataAsync()
     {
         try
         {
-            if (_startDate is not null && _endDate is not null && !string.IsNullOrEmpty(SelectedDevice))
+            if (_startDate is not null && _endDate is not null)
             {
                 _telemetryData = await _telemetryService.GetHistoricalTelemetryAsync(_startDate.Value, _endDate.Value, SelectedDevice);
             }
@@ -48,14 +50,19 @@ public partial class TelemetryComponent(ITelemetryService telemetryService) : Co
         }
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        SetSelectedDevice(Devices?.FirstOrDefault());
-    }
+        // Set default dates if not set
+        _startDate ??= DateTime.UtcNow.AddDays(-1);
+        _endDate ??= DateTime.UtcNow;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadDataAsync();
+        SetSelectedDevice(string.IsNullOrEmpty(SelectedDevice) ? null : SelectedDevice);
+
+        // Load data with current parameters
+        if (_startDate.HasValue && _endDate.HasValue)
+        {
+            await LoadDataAsync();
+        }
     }
 
     private async Task DeviceChangedCallback(ChangeEventArgs obj)

@@ -1,4 +1,15 @@
 @using RP5.Web.Models
+@if(_startDate is null || _endDate is null)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p>Loading chart data...</p>
+    </div>
+    return;
+}
+
 <div class="container">
     <div class="row justify-content-center mb-4">
         <div class="col-md-3">
@@ -16,44 +27,37 @@
         </div>
         <div class="col-md-3">
             <label>End Date:</label>
-            <input type="date" name="StartDate" class="form-control" @onchange="EndChangedCallback" value="@(_endDate.Value.ToString("yyyy-MM-dd"))" />
+            <input type="date" name="EndDate" class="form-control" @onchange="EndChangedCallback" value="@(_endDate.Value.ToString("yyyy-MM-dd"))" />
         </div>
     </div>
 </div>
 
-@if(_telemetryData?.Count > 0)
-{
-    <div class="wrapper">
-        <SfChart Title="Temperature C">
-            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Format="@DateTimeFormat" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
-                <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
-            </ChartPrimaryXAxis>
+<div class="wrapper">
+    <SfChart Title="Temperature C">
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Format="@DateTimeFormat" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+            <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+        </ChartPrimaryXAxis>
 
-            <ChartPrimaryYAxis Minimum="@MinTemp" Maximum="@MaxTemp" Interval="2" EdgeLabelPlacement="EdgeLabelPlacement.Shift" LabelFormat="{value} C" />
+        <ChartPrimaryYAxis Minimum="@MinTemp" Maximum="@MaxTemp" Interval="2" EdgeLabelPlacement="EdgeLabelPlacement.Shift" LabelFormat="{value} C" />
 
-            <ChartSeriesCollection>
-                <ChartSeries DataSource="@FilteredTelemetryData" XName="@(nameof(TelemetryData.Time))" YName="@(nameof(TelemetryData.Temperature))" Type="ChartSeriesType.Line">
-                    <ChartMarker Visible="true" Height="3" Width="3" IsFilled="true" Shape="ChartShape.Circle" />
-                </ChartSeries>
-            </ChartSeriesCollection>
-        </SfChart>
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@FilteredTelemetryData" XName="Time" YName="Temperature" Type="ChartSeriesType.Line">
+                <ChartMarker Visible="true" Height="3" Width="3" IsFilled="true" Shape="ChartShape.Circle" />
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
 
-        <SfChart Title="Humidity %">
-            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Format="@DateTimeFormat" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
-                <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
-            </ChartPrimaryXAxis>
+    <SfChart Title="Humidity %">
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Format="@DateTimeFormat" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+            <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+        </ChartPrimaryXAxis>
 
-            <ChartPrimaryYAxis Minimum="@MinHum" Maximum="@MaxHum" Interval="2" EdgeLabelPlacement="EdgeLabelPlacement.Shift" LabelFormat="{value} %" />
+        <ChartPrimaryYAxis Minimum="@MinHum" Maximum="@MaxHum" Interval="2" EdgeLabelPlacement="EdgeLabelPlacement.Shift" LabelFormat="{value} %" />
 
-            <ChartSeriesCollection>
-                <ChartSeries DataSource="@FilteredTelemetryData" XName="@(nameof(TelemetryData.Time))" YName="@(nameof(TelemetryData.Humidity))" Type="ChartSeriesType.Line">
-                    <ChartMarker Visible="true" Height="3" Width="3" IsFilled="true" Shape="ChartShape.Circle" />
-                </ChartSeries>
-            </ChartSeriesCollection>
-        </SfChart>
-    </div>
-}
-else
-{
-    <p>No data available for the selected period.</p>
-}
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@FilteredTelemetryData" XName="Time" YName="Humidity" Type="ChartSeriesType.Line">
+                <ChartMarker Visible="true" Height="3" Width="3" IsFilled="true" Shape="ChartShape.Circle" />
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
+</div>
