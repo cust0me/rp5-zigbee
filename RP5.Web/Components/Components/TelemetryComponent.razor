@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-3">
+            <label>Select Device:</label>
+            <select class="form-control" @onchange="DeviceChangedCallback">
+                @foreach(string device in Devices ?? [])
+                {
+                    <option value="@device">@device</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label>Start Date:</label>
+            <input type="date" name="StartDate" class="form-control" @onchange="StartChangedCallback" value="@(_startDate.Value.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-md-3">
+            <label>End Date:</label>
+            <input type="date" name="StartDate" class="form-control" @onchange="EndChangedCallback" value="@(_endDate.Value.ToString("yyyy-MM-dd"))" />
+        </div>
+    </div>
+</div>
+
+<div class="wrapper">
+    <SfChart Title="Temperature C">
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Format="@DateTimeFormat" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+            <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+        </ChartPrimaryXAxis>
+
+        <ChartPrimaryYAxis Minimum="@_minTemp" Maximum="@_maxTemp" Interval="1" EdgeLabelPlacement="EdgeLabelPlacement.Shift" LabelFormat="{value} C" />
+
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@FilteredTelemetryData" XName="Time" YName="Temperature" Type="ChartSeriesType.Line">
+                <ChartMarker Visible="true" Height="3" Width="3" IsFilled="true" Shape="ChartShape.Circle" />
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
+</div>

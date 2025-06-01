@@ -1,0 +1,9 @@
+@page "/"
+@using RP5.Web.Components.Components
+
+<PageTitle>Home</PageTitle>
+
+@if (_devices?.Count > 0)
+{
+    <TelemetryComponent Devices="_devices" />
+}
