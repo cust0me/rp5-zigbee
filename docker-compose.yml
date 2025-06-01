@@ -1,7 +1,7 @@
 services:
   rabbitmq:
     image: rabbitmq:4.1-management
-    container_name: rabbitmq
+    container_name: rp5-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -20,7 +20,7 @@ services:
 
   zigbee2mqtt:
     image: ghcr.io/koenkk/zigbee2mqtt
-    container_name: zigbee2mqtt
+    container_name: rp5-zigbee2mqtt
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -37,7 +37,7 @@ services:
 
   influxdb:
     image: influxdb:2.7
-    container_name: influxdb
+    container_name: rp5-influxdb
     ports:
       - "8086:8086"
     environment:
@@ -58,7 +58,7 @@ services:
 
   api:
     image: ghcr.io/cust0me/rp5-zigbee-api:master
-    container_name: api
+    container_name: rp5-api
     ports:
       - "${API_PORT}:8080"
     depends_on:
