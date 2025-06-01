@@ -76,11 +76,3 @@ services:
       InfluxDB__Token: ${INFLUXDB_ADMIN_TOKEN}
       InfluxDB__OrgId: ${INFLUXDB_ORG}
       InfluxDB__Bucket: ${INFLUXDB_BUCKET}
-
-  frontend:
-    image: ghcr.io/cust0me/rp5-zigbee-web
-    container_name: rp5-web
-    environment:
-      API_URL: http://rp5-api:${API_PORT}
-    ports:
-      - "${FRONTEND_PORT}:8080"
