@@ -1,5 +1,13 @@
 # Raspberry PI 5
 
+Devices used for this project:<br>
+[Raspberry PI 5 ](https://raspberrypi.dk/produkt/raspberry-pi-5-4-gb/)<br>
+*Sonoff ZigBee USB Dongle CC2531* is now deprecated, but it's successor is [here](https://sonoff.tech/product/gateway-and-sensors/sonoff-zigbee-3-0-usb-dongle-plus-p/)<br>
+[Aqara Temperature And Humidity Sensor T1](https://www.aqara.com/eu/product/temperature-humidity-sensor/)
+
+This project shows how you can get a Raspberry PI 5 4GB ARM64 to host a ZigBee network., which integrates with a .NET API which stores data in a influxdb database, and then a UI to display the collected telemetric data.
+
+**Prerequisites**:<br>
 The Raspberry PI 5 is installed using Raspberry PI Imager, the chosen operation system is **Pi OS Lite 64bit**
 
 1. After first initial start, run:
@@ -12,35 +20,6 @@ The Raspberry PI 5 is installed using Raspberry PI Imager, the chosen operation 
 
     ```
     sudo apt-get upgrade
-    ```
-
-## Detecting USB
-
-1. Run: ``lsusb`` to see active USB Devices.
-    1. Example output:
-    ```bash
-    andrias@andrias:~ $ lsusb
-    Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
-    Bus 003 Device 002: ID 0451:16a8 Texas Instruments, Inc. CC2531 ZigBee
-    Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-    Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
-    Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-    ```
-
-2. See last connected USB Devices: ``dmesg | grep -i tty``
-    1. Example output:
-    ```bash
-    andrias@andrias:~ $ dmesg | grep -i tty
-    [    0.000000] Kernel command line: reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave  numa=fake=8 system_heap.max_order=0 smsc95xx.macaddr=2C:CF:67:76:DF:80 vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=a46c75d5-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=DK
-    [    0.000095] printk: legacy console [tty1] enabled
-    [    0.056213] 107d001000.serial: ttyAMA10 at MMIO 0x107d001000 (irq = 16, base_baud = 0) is a PL011 rev3
-    [    0.056223] printk: legacy console [ttyAMA10] enabled
-    [    1.632335] 107d50c000.serial: ttyS0 at MMIO 0x107d50c000 (irq = 33, base_baud = 6000000) is a Broadcom BCM7271 UART
-    [    1.642944] serial serial0: tty port ttyS0 registered
-    [    4.005888] systemd[1]: Created slice system-getty.slice - Slice /system/getty.
-    [    4.021771] systemd[1]: Created slice system-serial\x2dgetty.slice - Slice /system/serial-getty.
-    [    4.092730] systemd[1]: Expecting device dev-ttyAMA10.device - /dev/ttyAMA10...
-    [15788.075443] cdc_acm 3-1:1.0: ttyACM0: USB ACM device
     ```
 
 ## Docker
@@ -80,91 +59,139 @@ The Raspberry PI 5 is installed using Raspberry PI Imager, the chosen operation 
     sudo reboot
     ```
 
-## RabbitMQ
+## Pulling the repository down to your PI
 
-1. Starting an instance of RabbitMQ using Docker:
+You need to clone the repository, and that can be done by running:
+
+```bash
+git clone https://github.com/cust0me/rp5-zigbee.git
+```
+
+Now, navigate into your repository:
+
+```bash
+cd rp5-zigbee
+```
+
+## Detecting USB
+
+1. Run: ``lsusb`` to see active USB Devices.
+    1. Example output:
+    ```bash
+    andrias@andrias:~ $ lsusb
+    Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+    Bus 003 Device 002: ID 0451:16a8 Texas Instruments, Inc. CC2531 ZigBee
+    Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+    Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+    Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+    ```
+
+    2. We can see that our ZigBee dongle is on `Bus 0003` with the name: `Texas Instruments, Inc. CC2531 ZigBee`
+    3. Search for it in the /dev/serial/by-id/ directory: `ls /dev/serial/by-id/`
+        I get the following output: 
+        ```bash
+        andrias@andrias:/ $ ls /dev/serial/by-id/
+        usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B001DF40392-if00
+        ```
+
+    4. No combine the `/dev/serial/by-id/` and `usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B001DF40392-if00` to:
 
     ```bash
-    docker run -it -d --name rabbitmq -p 5672:5672 -p 15672:15672 -p 1883:1883 rabbitmq:4.1-management
+    /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B001DF40392-if00
     ```
 
-2. Enabling MQTT plugin on RabbitMQ
-    1. Entering the container
-        ```bash
-        docker exec -it rabbitmq bash
-        ```
-    2. Enabling MQTT plugin
-        ```bash
-        rabbitmq-plugins enable rabbitmq_mqtt
-        ```
-    3. Exiting the container
-        ```bash
-        exit
-        ```
+    This is now the ful path to the zigbee usb dongle.
 
-3. RabbitMQ ManagementUI should now be available at the pi's ``hostname/ipaddress:15672``
-    1. The default login is: guest:guest
+## Configuring the setup
 
-## Zigbee2MQTT
+The configuration is across multiple files: `.env` and `./zigbee2mqtt/configuration.yml` file.
 
-1. Start an instance of Zigbee2MQTT using docker:
-    1. Remember to map the correct usb cordinator device on the --device line: 
+The most important configuration you have to do is change the `ZIGBEE_ADAPTER` in the `.env` file to the full usb path detailed in `Detecting USB 1.4`
 
-    ```bash
-    docker run -it -d --name zigbee2mqtt --restart=unless-stopped --device=/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0X00124B001DF40392-if00:/dev/ttyACM0 -p 8080:8080 -v $(pwd)/data:/app/data -v /run/udev:/run/udev:ro -e TZ=Europe/Amsterdam ghcr.io/koenkk/zigbee2mqtt
-    ```
+| KEY                     | Default Value         | Description                                                                                                                           |
+|-------------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| RABBITMQ_USER           | zigbee2mqtt           | The default Username for RabbitMQ <br> **N.B.** Changing this value requires additional changes in `./zigbee2mqtt/configuration.yml`  |
+| RABBITMQ_PASSWORD       | zigbee2mqtt           | The default Passowrd for RabbitMQ <br> **N.B.**  Changing this value requires additional changes in `./zigbee2mqtt/configuration.yml` |
+| ZIGBEE_ADAPTER          |                       | The full USB path for the ZigBee dongle                                                                                               |
+| INFLUXDB_ADMIN_USER     | admin                 | The default Username for InfluxDB                                                                                                     |
+| INFLUXDB_ADMIN_PASSWORD | supersecret           | The default Password for InfluxDB                                                                                                     |
+| INFLUXDB_ADMIN_TOKEN    | supersecretadmintoken | The default Token for InfluxDB (Keep this safe and secure)                                                                            |
+| INFLUXDB_ORG            | rp5org                | The default Organization for InfluxDB                                                                                                 |
+| INFLUXDB_BUCKET         | Telemetry             | The default Bucket for InfluxDB                                                                                                       |
+| API_PORT                | 5000                  | The port the API is exposed on                                                                                                        |
 
-2. Stop the RabbitMQ and Zigbee2MQTT instances:
-    1. Run: `docker ps` find the container id's for rabbitmq and zigbee2mqtt
-    2. Run: `docker stop <id>` for both containers
+**N.B.** It is important that `RABBITMQ_USER` and `RABBITMQ_PASSWORD` in the `.env` file match `user` and `password` in the `./zigbee2mqtt/configuration.yml` file.
 
-3. Create a network for your RabbitMQ instance and the Zigbee2MQTT instance and attach it to the containers:
-    ```
-    docker network create zigbee_net
-    docker network connect zigbee_net rabbitmq
-    docker network connect zigbee_net zigbee2mqtt
-    ```
+## Running the setup on the Raspberry PI
 
-4. Configure the Zigbee2Mqtt instance:
-    1. In the working directory you started Zigbee2Mqtt from, run the following command: `sudo nano data/configuration.yaml`
-    2. In the mqtt section change the server address to: mqtt://rabbitmq:1883
-    3. In the front end section, set the enabled to true
-    4. Save changes (CTRL + X, y, enter)
+After the configuration is done, all you have to do on your raspberry pi is to run: `docker compose up -d`
 
-2. Stop the RabbitMQ  and Zigbee2MQTT instances:
-    1. Run: `docker ps` find the container id's for rabbitmq and zigbee2mqtt
-    2. Run: `docker stop <id>` for both containers
+The containers will the be spun up, and can be reached at:
 
-Rest is TBD
+| Service             | Launch url                  |
+|---------------------|-----------------------------|
+| Zigbee2MQTT         | http://<hostaddress\>:8080  |
+| RabbitMQ Management | http://<hostaddress\>:15672 |
+| InfluxDB            | http://<hostaddress\>:8086  |
+| API                 | http://<hostaddress\>:5000  |
+| UI                  | https://localhost:5002      |
 
-## InfluxDB
+**N.B.** `hostaddress` is the one you set when you installed your raspberry pi, or you could replace it with the pi's ip-address.
 
-1. Starting an instance of InfluxDB using Docker:
+## Adopting the Aqara Telemetry and Humidity sensor
 
-    ```
-    docker run -d -p 8086:8086 -v influxdb:/var/lib/influxdb -v influxdb2:/var/lib/influxdb2 influxdb:2.0
-    ```
+1. Open Zigbee2MQTT at the url in the table above
+2. Click on **Permit Join (All)** at the top center, this puts the ZigBee usb coordinator into adoption mode
+3. On your Aqara Temperature and Humidity Sensor T1, hold on the button on top for about 5 seconds until it blinks.
+4. You should see the device being added in the UI, and once it's recognized as a Aqara click on the Friendly Name e.g. `0x54ef44100091a459`
+5. Go to Reporting
+    1. You need to configure reporting for Temperature, Humidity and Pressure, as it does not do it automatically.
+    2. Temperature:
+        1. Select `1` in the Endpoint drop down
+        2. Select `Temperature` in the cluster drop down
+        3. Select `measuredValue` in the attribute drop down
+        4. Click Apply, after a few seconds there should appear a new blank row, repeat the steps 5.2.1-4 but for Humidity and pressure aswell.
+6. Verify everything is working by going to the dashboard, and after up to a minute, you should start seeing telemetric data.
 
-2. You can access the InfluxDB management portal by going to: ``hostname/ipaddress:8086``
-    1. Here you will create a default user: administrator
-    2. Set a secure password
-    3. Set an initial organization name: e.g. AndriasOrg
-    4. Set the bucket name to e.g. Telemetry
+<br>
 
-3. Establishing a connection:
-    1. Getting the address: that address is the same as you connect to in the browser: ``hostname/ipaddress:8086``
-    2. Getting the token: 
-        1. Go to the data tab on the left side
-        2. Select token section 
-        3. Generate a new full access token and copy the value
-    3. Getting the Organization ID:
-        1. Click on your Avatar
-        2. Click on About
-        3. Copy the Organization ID
+You can now try and execute a api request: `http://<hostaddress>:5000/telemetry/latest`
 
-    4. Getting the bucket name:
-        1. Go to the data tab on the left side
-        2. Click on buckets
-        3. Create a new one, or use the already created ``Telemetry`` bucket.
+You should see something similar to this:
 
-## Api (TBD)
+```json
+{
+    "temperature": 25.33,
+    "humidity": 48.39,
+    "pressure": 1008,
+    "_time": "2025-06-02T07:32:03.6626492Z",
+    "device": "0x54ef44100091a459"
+}
+```
+
+## Running the UI
+
+On your own machine, clone the repository: 
+
+```bash
+git clone https://github.com/cust0me/rp5-zigbee.git
+```
+
+Now, navigate into your repository:
+
+```bash
+cd rp5-zigbee
+```
+
+Now, navigate into your RP5.Web:
+
+```bash
+cd RP5.Web
+```
+
+Run the UI:
+```bash
+dotnet run -c release
+```
+
+The UI is now hosted here: [https://localhost:5002](https://localhost:5002)
