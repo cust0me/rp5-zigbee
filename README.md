@@ -171,6 +171,9 @@ You should see something similar to this:
 
 ## Running the UI
 
+Requirements:
+1. Install the Build apps - SDK for .NET 9 [here](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for your system architecture.
+
 On your own machine, clone the repository: 
 
 ```bash
