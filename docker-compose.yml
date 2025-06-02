@@ -27,7 +27,7 @@ services:
     devices:
       - "${ZIGBEE_ADAPTER}:/dev/ttyACM0"
     volumes:
-      - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml:ro
+      - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml
       - ./volumes/zigbee2mqtt-data:/app/data
     environment:
       - TZ=Europe/Amsterdam
