@@ -64,6 +64,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      influxdb:
+        condition: service_healthy
     environment:
       MqttBroker__Host: rabbitmq
       MqttBroker__Port: 1883

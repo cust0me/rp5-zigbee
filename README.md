@@ -138,6 +138,12 @@ The containers will the be spun up, and can be reached at:
 
 **N.B.** `hostaddress` is the one you set when you installed your raspberry pi, or you could replace it with the pi's ip-address.
 
+If you want to stop the containers, you can type: `docker compose stop`
+
+If you want to stop and delete the containers, you can type: `docker compose down`
+<br>
+N.B. the volumes directory will not get delete unless you explicitly remove it via: `sudo rm -rf ./volumes`
+
 ## Adopting the Aqara Telemetry and Humidity sensor
 
 1. Open Zigbee2MQTT at the url in the table above
