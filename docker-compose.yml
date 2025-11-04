@@ -73,7 +73,7 @@ services:
       MqttBroker__ClientId: "rp5-zigbee-api"
       MqttBroker__Username: ${RABBITMQ_USER}
       MqttBroker__Password: ${RABBITMQ_PASSWORD}
-      MqttBroker__TelemetryTopics: "[\"zigbee2mqtt/+\"]"
+      MqttBroker__TelemetryTopics__0: "zigbee2mqtt/+"
       InfluxDB__Host: http://influxdb:8086
       InfluxDB__Token: ${INFLUXDB_ADMIN_TOKEN}
       InfluxDB__OrgId: ${INFLUXDB_ORG}

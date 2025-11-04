@@ -148,19 +148,22 @@ public sealed class InfluxDbService : IInfluxDbService, IDisposable
 
                 // sort by time
                 |> sort(columns: ["_time"], desc: true)
-            
-                // only take the first element
-                |> top(n: 1)
             """;
             
             if (string.IsNullOrWhiteSpace(device) == false)
             {
                 fluxQuery += 
-                    $"""
+                $"""
                      // We only want to query the telemetry data for the given device
                      |> filter(fn: (r) => r.device == "{device}")
-                     """;
+                 """;
             }
+
+            fluxQuery +=
+            """
+                // only take the first element
+                |> top(n: 1)
+            """;
 
             List<TelemetryData> result = await queryApiAsync.QueryAsync<TelemetryData>(fluxQuery, _orgId, cancellationToken: cancellationToken);
             return result.FirstOrDefault();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11201.2 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RP5.API", "RP5.API\RP5.API.csproj", "{F35708B8-02BC-4F75-BEB8-1DD1869F463F}"
 EndProject
@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configuration", "configurat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zigbee2mqtt", "zigbee2mqtt", "{FC9FD8E0-B12F-4BB3-99DC-EA281FB35182}"
 	ProjectSection(SolutionItems) = preProject
-		configuration.yaml = configuration.yaml
+		zigbee2mqtt\configuration.yaml = zigbee2mqtt\configuration.yaml
 	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
